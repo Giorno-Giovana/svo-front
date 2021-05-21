@@ -1,6 +1,5 @@
 <template>
   <div id="map-wrap" style="height: 100vh">
-    <h1 class="text-indigo">Text</h1>
     <span class=""></span>
     <l-map :zoom="15" :center="[55.981317, 37.410052]" @click="log">
       <l-tile-layer url="https://{s}.tile.osm.org/{z}/{x}/{y}.png" />
