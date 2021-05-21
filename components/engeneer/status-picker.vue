@@ -13,14 +13,15 @@
         <div class="status__text">{{ status.text }}</div>
       </div>
     </div>
-    <button class="m-auto block w-full bg-primary rounded-lg mb-12 h-12">Далее</button>
+    <designed-button text="Далее" @click="emitNext" />
   </bottom-menu>
 </template>
 
 <script>
+import DesignedButton from '../designed-button'
 import BottomMenu from './bottom-menu'
 export default {
-  components: { BottomMenu },
+  components: { DesignedButton, BottomMenu },
   data() {
     return {
       statuses: [
@@ -34,10 +35,10 @@ export default {
   methods: {
     chooseStatus(status) {
       this.selected = status
-      this.emitNext(status)
+      this.emitNext()
     },
-    emitNext(status) {
-      this.$emit('status', status)
+    emitNext() {
+      this.$emit('status', this.selected)
     },
   },
 }
