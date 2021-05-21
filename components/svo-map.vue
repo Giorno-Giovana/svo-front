@@ -6,7 +6,7 @@
       @click="mapClick"
     >
       <l-tile-layer
-        url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
+        url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
       ></l-tile-layer>
       <!--   Маркеры назначения   -->
       <l-marker
@@ -87,23 +87,12 @@ export default {
       colors: [],
       color: '',
       polyType: '',
-      destinationMarkers: [
-        // {
-        // TODO: Сделать тип
-        // id: this.currentId,
-        // position: [55.973383313398216, 37.41584111915638],
-        // draggable: true,
-        // work type
-        // name
-        // description
-        // current work
-        // тип техники
-        // },
-      ],
+      destinationMarkers: [],
       executorMarkers: [],
       polygons,
       lines: [],
       animationInterval: null,
+      isRunAnimation: false,
     }
   },
   created() {
@@ -136,6 +125,7 @@ export default {
       )
       clearInterval(this.animationInterval)
       this.animationInterval = setInterval(() => {
+        this.isRunAnimation = true
         if (positionIndex < 40) {
           currentExecutor.position = {
             lat: startPoint.lat + deltaLat * positionIndex,
@@ -150,6 +140,7 @@ export default {
 
           positionIndex++
         } else {
+          this.isRunAnimation = false
           clearInterval(this.animationInterval)
           this.clearPreviousPath(id)
           this.currentDestinationMarkerId--
@@ -160,7 +151,7 @@ export default {
       return (-(x1 * y2 - x2 * y1) - (y1 - y2) * x) / (x2 - x1)
     },
     addDestinationMarker(event) {
-      if (this.destinationMarkerMode) {
+      if (this.destinationMarkerMode && !this.isRunAnimation) {
         this.currentDestinationMarkerId++
         const executorID = 'executor' + this.currentExecutorMarkerId
         this.destinationMarkers.push({
