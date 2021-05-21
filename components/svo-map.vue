@@ -37,6 +37,13 @@
         :lat-lngs="polygon.latlngs"
         :color="polygon.color"
       ></l-polygon>
+      <!--    Lines     -->
+      <l-polyline
+        v-for="line in lines"
+        :key="line.id"
+        :lat-lngs="line.latlngs"
+        :color="'white'"
+      ></l-polyline>
     </l-map>
     <div class="add-executor-marker">
       <label for="executor-marker-mode">Add executor marker mode</label>
@@ -95,6 +102,8 @@ export default {
       ],
       executorMarkers: [],
       polygons,
+      lines: [],
+      animationInterval: null,
     }
   },
   created() {
@@ -111,16 +120,68 @@ export default {
       this.addPolygon(event)
       this.addExecutorMarker(event)
     },
+    drawLine(startPoint, endPoint, id) {
+      const lineId = 'lineFor' + id
+      this.lines.push({
+        id: lineId,
+        latlngs: [
+          [startPoint.lat, startPoint.lng],
+          [endPoint.lat, endPoint.lng],
+        ],
+      })
+      const deltaLat = (endPoint.lat - startPoint.lat) / 40
+      let positionIndex = 0
+      const currentExecutor = this.executorMarkers.find(
+        (marker) => marker.id === id
+      )
+      clearInterval(this.animationInterval)
+      this.animationInterval = setInterval(() => {
+        if (positionIndex < 40) {
+          currentExecutor.position = {
+            lat: startPoint.lat + deltaLat * positionIndex,
+            lng: this.lineFunc(
+              startPoint.lat,
+              startPoint.lng,
+              endPoint.lat,
+              endPoint.lng,
+              startPoint.lat + deltaLat * positionIndex
+            ),
+          }
+
+          positionIndex++
+        } else {
+          clearInterval(this.animationInterval)
+          this.clearPreviousPath(id)
+          this.currentDestinationMarkerId--
+        }
+      }, 50)
+    },
+    lineFunc(x1, y1, x2, y2, x) {
+      return (-(x1 * y2 - x2 * y1) - (y1 - y2) * x) / (x2 - x1)
+    },
     addDestinationMarker(event) {
       if (this.destinationMarkerMode) {
         this.currentDestinationMarkerId++
-
+        const executorID = 'executor' + this.currentExecutorMarkerId
         this.destinationMarkers.push({
           id: 'destination' + this.currentDestinationMarkerId,
           position: event.latlng,
           draggable: true,
+          for: executorID,
         })
+        this.drawLine(
+          this.executorMarkers[this.currentExecutorMarkerId - 1].position,
+          this.destinationMarkers[this.currentDestinationMarkerId - 1].position,
+          executorID
+        )
+        setTimeout(() => {}, 1000)
       }
+    },
+    clearPreviousPath(forID) {
+      this.lines = this.lines.filter((line) => line.id !== 'lineFor' + forID)
+      this.destinationMarkers = this.destinationMarkers.filter(
+        (destinationMarker) => destinationMarker.for !== forID
+      )
     },
     addExecutorMarker(event) {
       if (this.executorMarkerMode) {
