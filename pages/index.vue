@@ -1,26 +1,13 @@
 <template>
-  <div id="map-wrap" style="height: 100vh">
-    <span class=""></span>
-    <l-map :zoom="15" :center="[55.981317, 37.410052]" @click="log">
-      <l-tile-layer url="https://{s}.tile.osm.org/{z}/{x}/{y}.png" />
-      <l-marker :lat-lng="[55.9464418, 8.1277591]"></l-marker>
-    </l-map>
-  </div>
+  <svo-map></svo-map>
 </template>
 
 <script>
 export default {
   data() {
-    return {
-      points: [],
-    }
+    return {}
   },
-  methods: {
-    log(args) {
-      this.points.push(args)
-      console.log(this.points)
-    },
-  },
+  methods: {},
 }
 </script>
 

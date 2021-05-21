@@ -6721,7 +6721,7 @@ num2fraction@^1.2.2:
   resolved "https://registry.yarnpkg.com/num2fraction/-/num2fraction-1.2.2.tgz#6f682b6a027a4e9ddfa4564cd2589d1d4e669ede"
   integrity sha1-b2gragJ6Tp3fpFZM0lidHU5mnt4=
 
-nuxt-leaflet@^0.0.25:
+nuxt-leaflet@0.0.25:
   version "0.0.25"
   resolved "https://registry.yarnpkg.com/nuxt-leaflet/-/nuxt-leaflet-0.0.25.tgz#b68b94ff2a524a9424d79b5fb72666c11799a064"
   integrity sha512-R/XWs/kQOat+sgAggQk7llmgPXLWWCwDs7Z7N7y1XNc0cKW5Phc+wfBxNvuYS0tQ+UuS9CtNOSxhLJEBXl1wjQ==
