@@ -105,12 +105,16 @@ export default {
   },
   methods: {
     mapClick(event) {
+      // Добавить маркер перемещения
       this.addDestinationMarker(event)
+      // Добавить полигон TODO: убрать, когда утвердим полигоны
       this.addPolygon(event)
+      // Добавить маркер исполнителя
       this.addExecutorMarker(event)
     },
     drawLine(startPoint, endPoint, id) {
       const lineId = 'lineFor' + id
+      // Рисуем линию
       this.lines.push({
         id: lineId,
         latlngs: [
@@ -118,15 +122,22 @@ export default {
           [endPoint.lat, endPoint.lng],
         ],
       })
+      // Дельта x для анимации
       const deltaLat = (endPoint.lat - startPoint.lat) / 40
+      // Номер анимации
       let positionIndex = 0
+      // Текущий исполнитель
       const currentExecutor = this.executorMarkers.find(
         (marker) => marker.id === id
       )
+      // Очищаем интервал
       clearInterval(this.animationInterval)
+      // Запускаем анимацию
       this.animationInterval = setInterval(() => {
+        // Флаг, который говорит о том, что анимация происходит в данный момент
         this.isRunAnimation = true
         if (positionIndex < 40) {
+          // Меняем позицию исполнителя
           currentExecutor.position = {
             lat: startPoint.lat + deltaLat * positionIndex,
             lng: this.lineFunc(
@@ -137,39 +148,46 @@ export default {
               startPoint.lat + deltaLat * positionIndex
             ),
           }
-
           positionIndex++
         } else {
+          // Заканчиваем анимацию
           this.isRunAnimation = false
+          // Очищаем интервал
           clearInterval(this.animationInterval)
+          // Очищаем путь, который был до анимации
           this.clearPreviousPath(id)
           this.currentDestinationMarkerId--
         }
       }, 50)
     },
     lineFunc(x1, y1, x2, y2, x) {
+      // Вычисляет y по функции прямой
       return (-(x1 * y2 - x2 * y1) - (y1 - y2) * x) / (x2 - x1)
     },
     addDestinationMarker(event) {
+      // Если не анимация и мод добавления перемещения
       if (this.destinationMarkerMode && !this.isRunAnimation) {
         this.currentDestinationMarkerId++
         const executorID = 'executor' + this.currentExecutorMarkerId
+        // Записываем маркер перемещения
         this.destinationMarkers.push({
           id: 'destination' + this.currentDestinationMarkerId,
           position: event.latlng,
           draggable: true,
           for: executorID,
         })
+        // Рисуем линию от точки назначения к ее исполнителю
         this.drawLine(
           this.executorMarkers[this.currentExecutorMarkerId - 1].position,
           this.destinationMarkers[this.currentDestinationMarkerId - 1].position,
           executorID
         )
-        setTimeout(() => {}, 1000)
       }
     },
     clearPreviousPath(forID) {
+      // Удаляем предыдущую линию
       this.lines = this.lines.filter((line) => line.id !== 'lineFor' + forID)
+      // Удаляем предыдущий маркер
       this.destinationMarkers = this.destinationMarkers.filter(
         (destinationMarker) => destinationMarker.for !== forID
       )
@@ -177,6 +195,7 @@ export default {
     addExecutorMarker(event) {
       if (this.executorMarkerMode) {
         this.currentExecutorMarkerId++
+        // Добавляем маркер исполнителя
         this.executorMarkers.push({
           id: 'executor' + this.currentExecutorMarkerId,
           position: event.latlng,
@@ -186,8 +205,10 @@ export default {
       }
     },
     addPolygon(event) {
+      // TODO: убрать, когда утвердим полигоны
       if (this.polyMode) {
         if (!this.polygonPointsCounter) {
+          // Добавляем полигон
           this.polygonsOut.push({
             id: 'polygon' + this.currentPolyId,
             latlngs: [],
@@ -195,13 +216,16 @@ export default {
             type: this.polyType,
           })
         }
+        // Если ввели меньше 4-х точек
         if (this.polygonPointsCounter < 4) {
+          // Записываем координаты точек в полигон
           this.polygonsOut[this.currentPolyId].latlngs.push([
             event.latlng.lat,
             event.latlng.lng,
           ])
           this.polygonPointsCounter++
           if (this.polygonPointsCounter === 4) {
+            // Добавляем новый полигон
             window.localStorage.setItem(
               'polygons',
               JSON.stringify(this.polygonsOut)
@@ -213,6 +237,7 @@ export default {
       }
     },
     removeMarker(id) {
+      // Удаляем маркер
       this.destinationMarkers.splice(id, 1)
     },
   },
