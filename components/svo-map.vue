@@ -20,11 +20,16 @@
       <l-marker
         v-for="marker in executorMarkers"
         :key="marker.id"
-        :icon="executorIcon"
         :lat-lng="marker.position"
         :draggable="marker.draggable"
         @click="removeMarker(marker.id)"
-      />
+      >
+        <l-icon :icon-anchor="[16, 37]" class-name="executor-point">
+          <div class="headline">{{ marker.name }}</div>
+          <img class="img" src="../assets/snowcar.svg" />
+        </l-icon>
+      </l-marker>
+
       <!--   Полигоны   -->
       <l-polygon
         v-for="polygon in polygons"
@@ -33,9 +38,21 @@
         :color="polygon.color"
       ></l-polygon>
     </l-map>
-    <div class="add-marker">
-      <label for="marker-mode">Add marker mode</label>
-      <input id="marker-mode" v-model="markerMode" type="checkbox" />
+    <div class="add-executor-marker">
+      <label for="executor-marker-mode">Add executor marker mode</label>
+      <input
+        id="executor-marker-mode"
+        v-model="executorMarkerMode"
+        type="checkbox"
+      />
+    </div>
+    <div class="add-destination-marker">
+      <label for="destination-marker-mode">Add destination marker mode</label>
+      <input
+        id="destination-marker-mode"
+        v-model="destinationMarkerMode"
+        type="checkbox"
+      />
     </div>
     <div class="add-poly">
       <label for="poly-mode">Polygon mode</label>
@@ -46,19 +63,20 @@
 </template>
 
 <script>
-import L from 'leaflet'
 import polygons from './polygon-store.json'
 
 export default {
   name: 'SvoMap',
   data() {
     return {
-      markerMode: false,
+      destinationMarkerMode: false,
       polyMode: false,
+      executorMarkerMode: false,
       polygonPointsCounter: 0,
       polygonsOut: [],
       currentPolyId: 0,
-      currentMarkerId: 0,
+      currentDestinationMarkerId: 0,
+      currentExecutorMarkerId: 0,
       colors: [],
       color: '',
       polyType: '',
@@ -77,11 +95,6 @@ export default {
       ],
       executorMarkers: [],
       polygons,
-      executorIcon: L.icon({
-        iconUrl: require('@/assets/snowcar.svg'),
-        iconSize: [32, 37],
-        iconAnchor: [16, 37],
-      }),
     }
   },
   created() {
@@ -91,34 +104,34 @@ export default {
       } while (this.colors.includes(this.color))
       this.colors.push('#' + ('000000' + this.color.toString(16)).slice(-6))
     }
-    this.addExecutorMarker()
   },
   methods: {
     mapClick(event) {
       this.addDestinationMarker(event)
       this.addPolygon(event)
+      this.addExecutorMarker(event)
     },
     addDestinationMarker(event) {
-      if (this.markerMode) {
-        this.currentMarkerId++
+      if (this.destinationMarkerMode) {
+        this.currentDestinationMarkerId++
 
         this.destinationMarkers.push({
-          id: this.currentMarkerId,
+          id: 'destination' + this.currentDestinationMarkerId,
           position: event.latlng,
           draggable: true,
         })
       }
     },
-    addExecutorMarker() {
-      console.log('addExecutorMarker')
-      this.executorMarkers.push({
-        id: this.currentMarkerId,
-        position: {
-          lat: 55.973383313398216,
-          lng: 37.41584111915638,
-        },
-        draggable: true,
-      })
+    addExecutorMarker(event) {
+      if (this.executorMarkerMode) {
+        this.currentExecutorMarkerId++
+        this.executorMarkers.push({
+          id: 'executor' + this.currentExecutorMarkerId,
+          position: event.latlng,
+          draggable: true,
+          name: 'car' + this.currentExecutorMarkerId,
+        })
+      }
     },
     addPolygon(event) {
       if (this.polyMode) {
@@ -166,5 +179,13 @@ export default {
 /*TODO: убрать после добавления полигонов*/
 .leaflet-dragging .leaflet-grab {
   cursor: move;
+}
+.executor-point .headline {
+  font-size: 20px;
+  margin-bottom: -10px;
+  margin-left: 3px;
+}
+.executor-point img {
+  height: 50px;
 }
 </style>
