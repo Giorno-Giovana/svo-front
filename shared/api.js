@@ -1,12 +1,15 @@
 export default class SocketClient {
   constructor(config) {
     this.webSocket = new WebSocket('ws://' + config.domain)
-    this.onMessageHandler = function (message) {
-      console.log(message)
+    this.webSocket.sendResponce = function (data) {
+      this.send(JSON.stringify(data))
+    }
+    this.onMessageHandler = function (connect, data) {
+      console.log(data)
     }
     const client = this
     this.webSocket.onmessage = function (event) {
-      client.onMessageHandler(event.data)
+      client.onMessageHandler(client.webSocket, JSON.parse(event.data))
     }
     this.webSocket.onclose = function () {
       console.log('<Соединение закрыто>')
@@ -17,8 +20,8 @@ export default class SocketClient {
     this.onMessageHandler = handler
   }
 
-  send(message) {
-    this.webSocket.send(message)
+  send(data) {
+    this.webSocket.send(JSON.stringify(data))
   }
 
   close() {
