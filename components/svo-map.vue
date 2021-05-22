@@ -264,6 +264,7 @@ export default {
   cursor: move;
 }
 .executor-point .headline {
+  color: white;
   font-size: 20px;
   margin-bottom: -10px;
   margin-left: 3px;
