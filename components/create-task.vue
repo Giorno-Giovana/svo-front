@@ -38,11 +38,7 @@
         <img src="~assets/left-arrow.svg" class="cursor-pointer" alt="" @click="closeDrawer" />
         <div class="ml-3 text-2xl">Плужно-щеточная машина с реагентом (25шт)</div>
       </div>
-      <div
-        v-for="suggestedVehicle in suggestedVehicles.find((el) => el.type === currentVehicleType).vehicles"
-        :key="suggestedVehicle.id"
-        class="flex mt-6"
-      >
+      <div v-for="suggestedVehicle in (selectedVehiclesType || []).vehicles" :key="suggestedVehicle.id" class="flex mt-6">
         <div class="mt-3">
           <a-checkbox :value="suggestedVehicle.id" :checked="suggestedVehicle.selected" @change="onChange" />
         </div>
@@ -114,6 +110,11 @@ export default {
         },
       ],
     }
+  },
+  computed: {
+    selectedVehiclesType() {
+      return this.suggestedVehicles.find((el) => el.type === this.currentVehicleType)
+    },
   },
   methods: {
     onChange(checkedValue) {
