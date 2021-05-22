@@ -50,7 +50,7 @@
         v-for="polygon of polygons"
         :key="polygon.id"
         :lat-lngs="polygon.latlngs"
-        :fill-color="typeof polygon.status !== Number || !polygon.status ? 'blue' : polygon.status === 1 ? 'yellow' : 'red'"
+        :fill-color="typeof polygon.status !== Number || !polygon.status ? 'blue' : polygon.status === 1 ? '#F3B15D' : '#292B30'"
         :color="'blue'"
         :stroke="polygon.id === strokedPolygonId"
         @mouseup="polyCLick($event, polygon)"
@@ -58,20 +58,20 @@
       <!--    Lines     -->
       <!--      <l-polyline v-for="line of lines" :key="line.id" :lat-lngs="line.latlngs" :color="'white'"></l-polyline>-->
     </l-map>
-    <div class="add-worker-marker">
-      <label for="worker-marker-mode">Add worker marker mode</label>
-      <input v-model="workerType" type="text" />
-      <input id="worker-marker-mode" v-model="workerMarkerMode" type="checkbox" />
-    </div>
-    <div class="add-destination-marker">
-      <label for="destination-marker-mode">Add destination marker mode</label>
-      <input id="destination-marker-mode" v-model="destinationMarkerMode" type="checkbox" />
-    </div>
-    <div class="add-poly">
-      <label for="poly-mode">Polygon mode</label>
-      <input v-model="polyType" type="text" />
-      <input id="poly-mode" v-model="polyMode" type="checkbox" />
-    </div>
+    <!--    <div class="add-worker-marker">-->
+    <!--      <label for="worker-marker-mode">Add worker marker mode</label>-->
+    <!--      <input v-model="workerType" type="text" />-->
+    <!--      <input id="worker-marker-mode" v-model="workerMarkerMode" type="checkbox" />-->
+    <!--    </div>-->
+    <!--    <div class="add-destination-marker">-->
+    <!--      <label for="destination-marker-mode">Add destination marker mode</label>-->
+    <!--      <input id="destination-marker-mode" v-model="destinationMarkerMode" type="checkbox" />-->
+    <!--    </div>-->
+    <!--    <div class="add-poly">-->
+    <!--      <label for="poly-mode">Polygon mode</label>-->
+    <!--      <input v-model="polyType" type="text" />-->
+    <!--      <input id="poly-mode" v-model="polyMode" type="checkbox" />-->
+    <!--    </div>-->
   </div>
 </template>
 
