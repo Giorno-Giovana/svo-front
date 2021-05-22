@@ -1,8 +1,8 @@
 <template>
   <div
-    class="w-96 h-64 p-6 pb-0 overflow-auto bottom-0 mt-auto"
+    class="w-96 h-64 p-6 pb-0 overflow-auto bottom-0 mt-auto fixed bottom-0"
     :class="{ 'h-screen': isExpended, right: corner === 'right', left: corner === 'left' }"
-    style="backdrop-filter: blur(12px); background: rgba(22, 24, 28, 0.5)"
+    style="backdrop-filter: blur(12px); background: rgba(22, 24, 28, 0.5); z-index: 1000"
   >
     <div class="flex justify-between mb-5">
       <div class="text-xl text-white-primary">{{ title }}</div>

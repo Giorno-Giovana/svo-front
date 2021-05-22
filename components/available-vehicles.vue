@@ -1,5 +1,8 @@
 <template>
-  <div class="h-16 rounded-xl bg-black-bg pl-10 pr-10 flex justify-between mt-auto mb-12" style="width: 500px">
+  <div
+    class="h-16 rounded-xl bg-black-bg pl-10 pr-10 flex justify-between mt-auto mb-12 fixed bottom-0"
+    style="width: 500px; z-index: 1000; left: 37%"
+  >
     <a-badge
       v-for="vehicle in vehicles"
       :key="vehicle.id"

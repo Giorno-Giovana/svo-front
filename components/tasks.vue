@@ -1,11 +1,11 @@
 <template>
-  <corner-menu title="Текущие задачи" corner="right">
+  <corner-menu title="Текущие задачи" corner="right" class="right-0">
     <corner-menu-element v-for="task in tasks" :key="task.id" @click="$emit('taskChoose', task)">
       <div>
         <div>{{ task.text }}</div>
         <div class="flex mt-1">
           <div v-for="vehicle in task.vehicles" :key="vehicle.id" class="flex">
-            <car-icon :vehicle="vehicle.type" width="24" height="24" />
+            <car-icon :vehicle="vehicle.type" :width="24" :height="24" />
             <div class="mr-2">x{{ vehicle.count }}</div>
           </div>
         </div>
