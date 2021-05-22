@@ -68,6 +68,12 @@ export default {
   name: 'CreateTask',
   components: { DesignedButton, CarIcon },
   mixins: [connectToBackend, drawer],
+  props: {
+    notification: {
+      type: Object,
+      default: null,
+    },
+  },
   data() {
     return {
       title: 'Сектор С15',
@@ -122,7 +128,10 @@ export default {
       this.suggestedVehicles.find((el) => el.id === checkedValue.target.value).selected = checkedValue.target.checked
     },
     createTask() {
-      this.addTask({ vehicles: this.suggestedVehicles.map((elm) => elm.vehicles.filter((vehicle) => vehicle.selected)) })
+      this.addTask({
+        vehicles: this.suggestedVehicles.map((elm) => elm.vehicles.filter((vehicle) => vehicle.selected)),
+        notification: this.notification,
+      })
     },
     suggestVehicles(type) {
       this.currentVehicleType = type

@@ -11,7 +11,7 @@
       :closable="false"
       @close="closeDrawer"
     >
-      <create-task />
+      <create-task :notification="notification" />
     </a-drawer>
   </div>
 </template>
@@ -26,10 +26,16 @@ import drawer from '../shared/mixins/drawer'
 export default {
   components: { CreateTask, AvailableVehicles, SvoMap, Notifications, Tasks },
   mixins: [drawer],
+  data() {
+    return {
+      notification: null,
+    }
+  },
   methods: {
     log(args) {
+      console.log('NOTY', args)
+      this.notification = args
       this.toggleDrawer()
-      console.log(args)
     },
   },
 }
