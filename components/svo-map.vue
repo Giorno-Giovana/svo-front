@@ -122,7 +122,11 @@ export default {
         })
         this.$emit('onPolyClick', poly)
       } else {
-        this.addDestinationMarker(event.latlng)
+        const flashedPolygon = this.polygons.find((polygon) => polygon.stroke)
+
+        if (flashedPolygon === poly) {
+          this.addDestinationMarker(event.latlng)
+        }
       }
     },
     clearPolygonsSelection() {
@@ -181,7 +185,6 @@ export default {
       // Если не анимация и мод добавления перемещения
 
       if (this.choiseLocation) {
-        // const flashedPolygon = this.polygons.find((polygon) => polygon.stroke)
         this.locationMarker = {
           location: event,
         }
@@ -240,7 +243,7 @@ export default {
           this.polygonsOut.push({
             id: 'polygon' + this.currentPolyId,
             latlngs: [],
-            color: this.colors[this.currentPolyId],
+            color: 'blue',
             type: this.polyType,
           })
         }
