@@ -3,27 +3,60 @@
     <l-map :zoom="15" :center="[55.973383313398216, 37.41584111915638]" @click="mapClick">
       <l-tile-layer url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"></l-tile-layer>
       <!--   Маркеры назначения   -->
-      <l-marker v-for="marker in destinationMarkers" :key="marker.id" :lat-lng="marker.location" @click="removeMarker(marker.id)" />
+      <l-marker v-for="marker of notifications" :key="'notification' + marker.id" :lat-lng="marker.location" />
       <l-marker v-if="locationMarker.location" :lat-lng="locationMarker.location" />
       <!--   Маркеры исполнителей   -->
-      <l-marker v-for="marker of workerMarkers" :key="marker.id" :lat-lng="marker.location" @click="removeMarker(marker.id)">
+      <!--      <l-marker v-for="(marker, index) of roadMarkers" :key="index" :lat-lng="marker" />-->
+      <l-marker v-for="marker of workerMarkers" :key="'worker' + marker.id" :lat-lng="marker.location">
         <l-icon :icon-anchor="[16, 37]" class-name="worker-point">
           <div class="headline">{{ marker.type }}[{{ marker.id }}]</div>
           <img class="img" src="../assets/snowcar.svg" />
         </l-icon>
       </l-marker>
+      <l-marker
+        v-for="polygonMarker of polygons"
+        :key="polygonMarker.id + 'marker'"
+        :lat-lng="{
+          lat: [polygonMarker.latlngs[0][0] + (polygonMarker.latlngs[2][0] - polygonMarker.latlngs[0][0]) / 2],
+          lng: [polygonMarker.latlngs[0][1] + (polygonMarker.latlngs[2][1] - polygonMarker.latlngs[0][1]) / 2],
+        }"
+      >
+        <l-icon :icon-anchor="[36, 50]" class-name="worker-point">
+          <div v-if="polygonMarker.status === 2" class="in-work">
+            <div class="headline pb-4">Идет отчистка</div>
+            <vue-ellipse-progress
+              class="ml-4"
+              :size="50"
+              font-color="white"
+              color="#2D9CFC"
+              :progress="polygonMarker.progress"
+              empty-color="#888B8F"
+            >
+              <span slot="legend-value">%</span>
+            </vue-ellipse-progress>
+          </div>
+          <div v-if="polygonMarker.status === 1" class="need">
+            <div class="headline pb-3">Требуется отчистка</div>
+            <div class="circle ml-2">
+              <span style="font-size: 1.5rem">!</span>
+            </div>
+          </div>
+          <span></span>
+        </l-icon>
+      </l-marker>
 
       <!--   Полигоны   -->
       <l-polygon
-        v-for="polygon in polygons"
+        v-for="polygon of polygons"
         :key="polygon.id"
         :lat-lngs="polygon.latlngs"
-        :color="polygon.color"
+        :fill-color="typeof polygon.status !== Number || !polygon.status ? 'blue' : polygon.status === 1 ? 'yellow' : 'red'"
+        :color="'blue'"
         :stroke="polygon.id === strokedPolygonId"
         @mouseup="polyCLick($event, polygon)"
       ></l-polygon>
       <!--    Lines     -->
-      <l-polyline v-for="line in lines" :key="line.id" :lat-lngs="line.latlngs" :color="'white'"></l-polyline>
+      <!--      <l-polyline v-for="line of lines" :key="line.id" :lat-lngs="line.latlngs" :color="'white'"></l-polyline>-->
     </l-map>
     <div class="add-worker-marker">
       <label for="worker-marker-mode">Add worker marker mode</label>
@@ -43,7 +76,8 @@
 </template>
 
 <script>
-import SocketClient from '../shared/api'
+import SocketClient, { subscribeToWS } from '../shared/api'
+
 import config from '../api-conf'
 import polygons from './polygon-store.json'
 
@@ -66,7 +100,10 @@ export default {
       polyMode: false,
       workerMarkerMode: false,
       polygonPointsCounter: 0,
+      destinationPointsCounter: 0,
+      pathIndex: 0,
       polygonsOut: [],
+      roadMarkers: [],
       strokedPolygonId: '',
       currentPolyId: 0,
       currentDestinationMarkerId: 0,
@@ -75,11 +112,12 @@ export default {
       color: '',
       polyType: '',
       workerType: '',
+      notifications: {},
       destinationMarkers: [],
       workerMarkers: [],
       polygons,
       locationMarker: {},
-      lines: [],
+      lines: {},
       animationInterval: null,
       isRunAnimation: false,
     }
@@ -92,10 +130,28 @@ export default {
     },
   },
   mounted() {
-    this.client.onMessage((connection, data) => {
+    console.log(this.polygons)
+    subscribeToWS((data) => {
       if (data?.workers) {
         this.workerMarkers = data.workers
-        window.svo = data
+      }
+    })
+    subscribeToWS((data) => {
+      if (data?.notify) {
+        this.notifications = data.notify
+      }
+    })
+    subscribeToWS((data) => {
+      if (data?.sectors) {
+        this.polygons.map((polygon) => {
+          for (const key in data.sectors) {
+            if (data.sectors[key].id === polygon.id) {
+              polygon.status = data.sectors[key].status
+              polygon.progress = data.sectors[key].progress
+            }
+          }
+          return polygon
+        })
       }
     })
   },
@@ -116,8 +172,17 @@ export default {
       // this.addDestinationMarker(event)
       // Добавить полигон TODO: убрать, когда утвердим полигоны
       this.addPolygon(event)
+      this.addRoadMarkers(event)
+
       // Добавить маркер исполнителя
       this.addWorkerMarker(event)
+    },
+    addRoadMarkers(event) {
+      console.log(event.latlng)
+      if (this.destinationMarkerMode) {
+        this.roadMarkers.push(event.latlng)
+        window.localStorage.setItem('roadMarkers', this.roadMarkers)
+      }
     },
     polyCLick(event, poly) {
       if (!this.choiseLocation) {
@@ -278,11 +343,21 @@ export default {
   cursor: move;
 }
 .worker-point .headline {
+  font-size: 0.5rem;
   color: white;
   margin-bottom: -10px;
   margin-left: 3px;
 }
 .worker-point img {
   height: 50px;
+}
+.circle {
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  background-color: #f3b15d;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
