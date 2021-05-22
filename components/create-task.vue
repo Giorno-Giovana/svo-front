@@ -24,7 +24,7 @@
       <img class="ml-auto cursor-pointer" src="~assets/right-arrow.svg" alt="" @click="openDrawer" />
     </div>
 
-    <designed-button text="Создать задачу" />
+    <designed-button text="Создать задачу" @click="createTask" />
 
     <a-drawer
       width="500"
@@ -60,14 +60,16 @@
 </template>
 
 <script>
+import connectToBackend from '../shared/mixins/connectToBackend'
+import drawer from '../shared/mixins/drawer'
 import CarIcon from './carIcon'
 import DesignedButton from './designed-button'
 export default {
   name: 'CreateTask',
   components: { DesignedButton, CarIcon },
+  mixins: [connectToBackend, drawer],
   data() {
     return {
-      isDrawerVisible: false,
       title: 'Сектор С15',
       subTitle: 'Требуется очистка',
       vehicles: [
@@ -89,20 +91,11 @@ export default {
     }
   },
   methods: {
-    closeDrawer() {
-      this.isDrawerVisible = false
-    },
-    openDrawer() {
-      this.isDrawerVisible = true
-    },
-    toggleDrawer() {
-      this.isDrawerVisible = !this.isDrawerVisible
-    },
-
     onChange(checkedValue) {
       console.log(checkedValue)
       this.suggestedVehicles.find((el) => el.id === checkedValue.target.value).selected = checkedValue.target.checked
     },
+    createTask() {},
   },
 }
 </script>
