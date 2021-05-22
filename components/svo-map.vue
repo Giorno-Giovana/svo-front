@@ -13,18 +13,16 @@
         v-for="marker in destinationMarkers"
         :key="marker.id"
         :lat-lng="marker.position"
-        :draggable="marker.draggable"
         @click="removeMarker(marker.id)"
       />
       <!--   Маркеры исполнителей   -->
       <l-marker
-        v-for="marker in executorMarkers"
+        v-for="marker in workerMarkers"
         :key="marker.id"
         :lat-lng="marker.position"
-        :draggable="marker.draggable"
         @click="removeMarker(marker.id)"
       >
-        <l-icon :icon-anchor="[16, 37]" class-name="executor-point">
+        <l-icon :icon-anchor="[16, 37]" class-name="worker-point">
           <div class="headline">{{ marker.name }}</div>
           <img class="img" src="../assets/snowcar.svg" />
         </l-icon>
@@ -36,6 +34,7 @@
         :key="polygon.id"
         :lat-lngs="polygon.latlngs"
         :color="polygon.color"
+        @click="polyCLick(polygon)"
       ></l-polygon>
       <!--    Lines     -->
       <l-polyline
@@ -45,11 +44,12 @@
         :color="'white'"
       ></l-polyline>
     </l-map>
-    <div class="add-executor-marker">
-      <label for="executor-marker-mode">Add executor marker mode</label>
+    <div class="add-worker-marker">
+      <label for="worker-marker-mode">Add worker marker mode</label>
+      <input v-model="workerType" type="text" />
       <input
-        id="executor-marker-mode"
-        v-model="executorMarkerMode"
+        id="worker-marker-mode"
+        v-model="workerMarkerMode"
         type="checkbox"
       />
     </div>
@@ -81,17 +81,18 @@ export default {
       // client: new SocketClient(config),
       destinationMarkerMode: false,
       polyMode: false,
-      executorMarkerMode: false,
+      workerMarkerMode: false,
       polygonPointsCounter: 0,
       polygonsOut: [],
       currentPolyId: 0,
       currentDestinationMarkerId: 0,
-      currentExecutorMarkerId: 0,
+      currentWorkerMarkerId: 0,
       colors: [],
       color: '',
       polyType: '',
+      workerType: '',
       destinationMarkers: [],
-      executorMarkers: [],
+      workerMarkers: [],
       polygons,
       lines: [],
       animationInterval: null,
@@ -111,12 +112,16 @@ export default {
   },
   methods: {
     mapClick(event) {
+      console.log(event)
       // Добавить маркер перемещения
       this.addDestinationMarker(event)
       // Добавить полигон TODO: убрать, когда утвердим полигоны
       this.addPolygon(event)
       // Добавить маркер исполнителя
-      this.addExecutorMarker(event)
+      this.addWorkerMarker(event)
+    },
+    polyCLick(poly) {
+      alert('polygon click. type: ' + poly.type + ' id: ' + poly.id)
     },
     drawLine(startPoint, endPoint, id) {
       const lineId = 'lineFor' + id
@@ -133,18 +138,19 @@ export default {
       // Номер анимации
       let positionIndex = 0
       // Текущий исполнитель
-      const currentExecutor = this.executorMarkers.find(
+      const currentWorker = this.workerMarkers.find(
         (marker) => marker.id === id
       )
       // Очищаем интервал
       clearInterval(this.animationInterval)
       // Запускаем анимацию
+
       this.animationInterval = setInterval(() => {
         // Флаг, который говорит о том, что анимация происходит в данный момент
         this.isRunAnimation = true
         if (positionIndex < 40) {
           // Меняем позицию исполнителя
-          currentExecutor.position = {
+          currentWorker.position = {
             lat: startPoint.lat + deltaLat * positionIndex,
             lng: this.lineFunc(
               startPoint.lat,
@@ -174,19 +180,18 @@ export default {
       // Если не анимация и мод добавления перемещения
       if (this.destinationMarkerMode && !this.isRunAnimation) {
         this.currentDestinationMarkerId++
-        const executorID = 'executor' + this.currentExecutorMarkerId
+        const workerID = 'worker' + this.currentWorkerMarkerId
         // Записываем маркер перемещения
         this.destinationMarkers.push({
           id: 'destination' + this.currentDestinationMarkerId,
           position: event.latlng,
-          draggable: true,
-          for: executorID,
+          for: workerID,
         })
         // Рисуем линию от точки назначения к ее исполнителю
         this.drawLine(
-          this.executorMarkers[this.currentExecutorMarkerId - 1].position,
+          this.workerMarkers[this.currentWorkerMarkerId - 1].position,
           this.destinationMarkers[this.currentDestinationMarkerId - 1].position,
-          executorID
+          workerID
         )
       }
     },
@@ -198,16 +203,25 @@ export default {
         (destinationMarker) => destinationMarker.for !== forID
       )
     },
-    addExecutorMarker(event) {
-      if (this.executorMarkerMode) {
-        this.currentExecutorMarkerId++
+    addWorkerMarker(event) {
+      if (this.workerMarkerMode) {
+        this.currentWorkerMarkerId++
         // Добавляем маркер исполнителя
-        this.executorMarkers.push({
-          id: 'executor' + this.currentExecutorMarkerId,
+        this.workerMarkers.push({
+          id: 'worker' + this.currentWorkerMarkerId,
+          type: this.workerType,
           position: event.latlng,
-          draggable: true,
-          name: 'car' + this.currentExecutorMarkerId,
         })
+
+        window.localStorage.setItem(
+          'workers',
+          JSON.stringify(this.workerMarkers)
+        )
+
+        // this.client.send({
+        //   id: 'worker' + this.currentWorkerMarkerId,
+        //   position: event.latlng,
+        // })
       }
     },
     addPolygon(event) {
@@ -263,13 +277,13 @@ export default {
 .leaflet-dragging .leaflet-grab {
   cursor: move;
 }
-.executor-point .headline {
+.worker-point .headline {
   color: white;
   font-size: 20px;
   margin-bottom: -10px;
   margin-left: 3px;
 }
-.executor-point img {
+.worker-point img {
   height: 50px;
 }
 </style>
