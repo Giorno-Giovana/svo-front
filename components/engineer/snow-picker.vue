@@ -8,8 +8,8 @@
       <a-slider v-model="snowVolume" :min="0" :max="10" />
     </div>
     <div class="flex">
-      <designed-button secondary style="margin-right: 5px" text="Назад" @click="$emit('back')" />
-      <designed-button style="margin-left: 5px" text="Далее" @click="$emit('next')" />
+      <designed-button secondary style="margin-right: 5px" text="Назад" @click="$emit('back', true)" />
+      <designed-button style="margin-left: 5px" text="Далее" @click="$emit('next', snowVolume)" />
     </div>
   </bottom-menu>
 </template>
@@ -19,7 +19,7 @@ import DesignedButton from '../designed-button'
 import BottomMenu from './bottom-menu'
 export default {
   name: 'SnowPicker',
-  components: { DesignedButton, BottomMenu },
+  components: { BottomMenu, DesignedButton },
   data() {
     return {
       snowVolume: 5,
@@ -29,6 +29,11 @@ export default {
     // TODO доделать эту секцию
     snowVolumeText() {
       return '10-15 см'
+    },
+  },
+  methods: {
+    back() {
+      this.$emit('back')
     },
   },
 }

@@ -35,10 +35,9 @@ export default {
   methods: {
     chooseStatus(status) {
       this.selected = status
-      this.emitNext()
     },
     emitNext() {
-      this.$emit('status', this.selected)
+      this.$emit('next', this.selected)
     },
   },
 }
