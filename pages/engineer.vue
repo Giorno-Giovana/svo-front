@@ -25,6 +25,7 @@ export default {
   },
   methods: {
     log(args) {
+      console.log(args)
       this.currentStep++
       if (this.currentStep === 3) {
         setTimeout(() => {

@@ -8,15 +8,15 @@
 
     <div class="fixed bottom-0 flex justify-between w-screen" style="z-index: 1000">
       <div></div>
-      <notifications />
+      <Tasks />
     </div>
   </div>
 </template>
 
 <script>
-import Notifications from '../components/notifications'
+import Tasks from '../components/tasks'
 export default {
-  components: { Notifications },
+  components: { Tasks },
   data() {
     return {}
   },
