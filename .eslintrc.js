@@ -13,5 +13,7 @@ module.exports = {
   rules: {
     'no-console': 0,
     'max-len': ['error', { code: 140 }],
+    'no-undef': 1,
+    'vue/no-unused-components': 1,
   },
 }
