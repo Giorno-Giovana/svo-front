@@ -50,6 +50,7 @@ export default {
       this.currentStep++
       if (this.currentStep === 4) {
         setTimeout(() => {
+          this.clearPoly = true
           this.currentStep++
         }, 2000)
       }

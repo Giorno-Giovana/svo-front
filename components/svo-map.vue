@@ -20,7 +20,7 @@
         :lat-lngs="polygon.latlngs"
         :color="polygon.color"
         :stroke="polygon.stroke || false"
-        @mouseup="polyCLick(polygon)"
+        @mouseup="polyCLick($event, polygon)"
       ></l-polygon>
       <!--    Lines     -->
       <l-polyline v-for="line in lines" :key="line.id" :lat-lngs="line.latlngs" :color="'white'"></l-polyline>
@@ -108,22 +108,25 @@ export default {
   methods: {
     mapClick(event) {
       // Добавить маркер перемещения
-      this.addDestinationMarker(event)
+      // this.addDestinationMarker(event)
       // Добавить полигон TODO: убрать, когда утвердим полигоны
       this.addPolygon(event)
       // Добавить маркер исполнителя
       this.addWorkerMarker(event)
     },
-    polyCLick(poly) {
+    polyCLick(event, poly) {
       if (!this.choiseLocation) {
         this.polygons = this.polygons.map((polygon) => {
           polygon.stroke = polygon.id === poly.id
           return polygon
         })
         this.$emit('onPolyClick', poly)
+      } else {
+        this.addDestinationMarker(event.latlng)
       }
     },
     clearPolygonsSelection() {
+      this.locationMarker = {}
       this.polygons = this.polygons.map((polygon) => {
         polygon.stroke = false
         return polygon
@@ -176,11 +179,13 @@ export default {
     },
     addDestinationMarker(event) {
       // Если не анимация и мод добавления перемещения
+
       if (this.choiseLocation) {
+        // const flashedPolygon = this.polygons.find((polygon) => polygon.stroke)
         this.locationMarker = {
-          location: event.latlng,
+          location: event,
         }
-        this.$emit('onLocationChoise', event.latlng)
+        this.$emit('onLocationChoise', event)
       }
       // if (this.choiseLocation) {
       //   this.currentDestinationMarkerId++
