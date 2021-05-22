@@ -4,12 +4,17 @@
     <svo-map
       :clear-poly="clearPoly"
       :choise-location="choiseLocation"
-      @onLocationChoise="currentPoly.location = $event"
+      @onLocationChoise="onLocationChoise($event)"
       @onPolyClick="polyClick($event)"
     />
     <transition name="slide-fade">
       <status-picker v-if="currentStep === 1" @closePicker="clearPolySelection" @next="nextPicker($event)" />
-      <location-picker v-if="currentStep === 2" @closePicker="clearPolySelection" @next="nextPicker($event)" />
+      <location-picker
+        v-if="currentStep === 2"
+        :allow-transition="allowTransition"
+        @closePicker="clearPolySelection"
+        @next="nextPicker($event)"
+      />
       <SnowPicker v-if="currentStep === 3" @closePicker="clearPolySelection" @next="nextPicker($event)" @back="currentStep -= 1" />
       <task-sent v-if="currentStep === 4" />
     </transition>
@@ -33,6 +38,7 @@ export default {
       clearPoly: false,
       currentPoly: {},
       choiseLocation: false,
+      allowTransition: false,
     }
   },
   watch: {
@@ -45,7 +51,6 @@ export default {
   },
   methods: {
     nextPicker(args) {
-      console.log(args)
       // eslint-disable-next-line no-prototype-builtins
       if (args.hasOwnProperty('status') && args.status !== undefined) {
         this.currentPoly.status = args.status
@@ -75,6 +80,7 @@ export default {
       this.currentStep++
       if (this.currentStep === 4) {
         setTimeout(() => {
+          this.allowTransition = false
           this.clearPoly = true
           this.currentStep++
         }, 2000)
@@ -84,6 +90,12 @@ export default {
       this.clearPoly = false
       this.currentPoly = data
       this.currentStep = 1
+    },
+    onLocationChoise(location) {
+      console.log('location choise')
+      this.allowTransition = true
+
+      this.currentPoly.location = location
     },
     clearPolySelection() {
       this.currentStep = 0
