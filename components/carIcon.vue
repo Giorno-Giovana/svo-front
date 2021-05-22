@@ -1,5 +1,5 @@
 <template>
-  <img :src="`/${vehicle}.png`" class="rounded-full w-full h-full" alt="" />
+  <img :src="`/${vehicle}.png`" class="rounded-full w-full h-full object-cover" alt="" />
 </template>
 
 <script>

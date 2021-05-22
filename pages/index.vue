@@ -1,13 +1,9 @@
 <template>
   <div id="map-wrap" style="height: 100vh">
-    <span class=""></span>
-    <l-map :zoom="15" :center="[55.981317, 37.410052]" @click="log">
-      <l-tile-layer url="https://{s}.tile.osm.org/{z}/{x}/{y}.png" />
-      <l-marker :lat-lng="[55.9464418, 8.1277591]"></l-marker>
-    </l-map>
-
+    <svo-map />
     <div class="fixed bottom-0 flex justify-between w-screen" style="z-index: 1000">
       <notifications @notificationChoose="log" />
+      <available-vehicles />
       <Tasks @taskChoose="log" />
     </div>
   </div>
@@ -16,8 +12,10 @@
 <script>
 import Tasks from '../components/tasks'
 import Notifications from '../components/notifications'
+import SvoMap from '../components/svo-map'
+import AvailableVehicles from '../components/available-vehicles'
 export default {
-  components: { Notifications, Tasks },
+  components: { AvailableVehicles, SvoMap, Notifications, Tasks },
   data() {
     return {}
   },
