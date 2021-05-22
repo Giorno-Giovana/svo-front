@@ -22,12 +22,10 @@ const connectToBackend = {
   },
   methods: {
     addTask(task) {
-      console.log(task)
+      console.log('Created task', task)
       this.client.send({
         method: 'addTask',
-        addTask: {
-          ...task,
-        },
+        addTask: task,
       })
     },
   },

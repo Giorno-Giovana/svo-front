@@ -29,18 +29,16 @@ export default {
   components: { CornerMenuElement, CornerMenu },
   data() {
     return {
-      notifications: [
-        { text: 'Нужна очистка сектора 16', id: 1 },
-        { text: 'Нужна очистка сектора 16', id: 2 },
-        { text: 'Нужна очистка сектора 16', id: 3 },
-        { text: 'Нужна очистка сектора 16', id: 4 },
-        { text: 'Нужна очистка сектора 16', id: 5 },
-      ],
+      notifications: [],
     }
   },
   mounted() {
     subscribeToWS((data) => {
-      console.log('SUBSCRIBE', data)
+      if (data.notify !== undefined) {
+        console.log('Notification', data.notify)
+        const lastNotify = data.notify[Object.keys(data.notify).pop()]
+        this.notifications.push({ data: lastNotify, id: lastNotify.sectorId, text: `Нужна очистка сектора ${lastNotify.id}` })
+      }
     })
   },
 }
