@@ -1,27 +1,11 @@
 <template>
   <div id="map-wrap">
-    <l-map
-      :zoom="15"
-      :center="[55.973383313398216, 37.41584111915638]"
-      @click="mapClick"
-    >
-      <l-tile-layer
-        url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
-      ></l-tile-layer>
+    <l-map :zoom="15" :center="[55.973383313398216, 37.41584111915638]" @click="mapClick">
+      <l-tile-layer url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"></l-tile-layer>
       <!--   Маркеры назначения   -->
-      <l-marker
-        v-for="marker in destinationMarkers"
-        :key="marker.id"
-        :lat-lng="marker.position"
-        @click="removeMarker(marker.id)"
-      />
+      <l-marker v-for="marker in destinationMarkers" :key="marker.id" :lat-lng="marker.position" @click="removeMarker(marker.id)" />
       <!--   Маркеры исполнителей   -->
-      <l-marker
-        v-for="marker in workerMarkers"
-        :key="marker.id"
-        :lat-lng="marker.position"
-        @click="removeMarker(marker.id)"
-      >
+      <l-marker v-for="marker in workerMarkers" :key="marker.id" :lat-lng="marker.position" @click="removeMarker(marker.id)">
         <l-icon :icon-anchor="[16, 37]" class-name="worker-point">
           <div class="headline">{{ marker.name }}</div>
           <img class="img" src="../assets/snowcar.svg" />
@@ -37,29 +21,16 @@
         @click="polyCLick(polygon)"
       ></l-polygon>
       <!--    Lines     -->
-      <l-polyline
-        v-for="line in lines"
-        :key="line.id"
-        :lat-lngs="line.latlngs"
-        :color="'white'"
-      ></l-polyline>
+      <l-polyline v-for="line in lines" :key="line.id" :lat-lngs="line.latlngs" :color="'white'"></l-polyline>
     </l-map>
     <div class="add-worker-marker">
       <label for="worker-marker-mode">Add worker marker mode</label>
       <input v-model="workerType" type="text" />
-      <input
-        id="worker-marker-mode"
-        v-model="workerMarkerMode"
-        type="checkbox"
-      />
+      <input id="worker-marker-mode" v-model="workerMarkerMode" type="checkbox" />
     </div>
     <div class="add-destination-marker">
       <label for="destination-marker-mode">Add destination marker mode</label>
-      <input
-        id="destination-marker-mode"
-        v-model="destinationMarkerMode"
-        type="checkbox"
-      />
+      <input id="destination-marker-mode" v-model="destinationMarkerMode" type="checkbox" />
     </div>
     <div class="add-poly">
       <label for="poly-mode">Polygon mode</label>
@@ -112,7 +83,6 @@ export default {
   },
   methods: {
     mapClick(event) {
-      console.log(event)
       // Добавить маркер перемещения
       this.addDestinationMarker(event)
       // Добавить полигон TODO: убрать, когда утвердим полигоны
@@ -121,7 +91,9 @@ export default {
       this.addWorkerMarker(event)
     },
     polyCLick(poly) {
-      alert('polygon click. type: ' + poly.type + ' id: ' + poly.id)
+      console.log('click polygon')
+      this.$emit('onPolyClick', poly)
+      // alert('polygon click. type: ' + poly.type + ' id: ' + poly.id)
     },
     drawLine(startPoint, endPoint, id) {
       const lineId = 'lineFor' + id
@@ -138,9 +110,7 @@ export default {
       // Номер анимации
       let positionIndex = 0
       // Текущий исполнитель
-      const currentWorker = this.workerMarkers.find(
-        (marker) => marker.id === id
-      )
+      const currentWorker = this.workerMarkers.find((marker) => marker.id === id)
       // Очищаем интервал
       clearInterval(this.animationInterval)
       // Запускаем анимацию
@@ -152,13 +122,7 @@ export default {
           // Меняем позицию исполнителя
           currentWorker.position = {
             lat: startPoint.lat + deltaLat * positionIndex,
-            lng: this.lineFunc(
-              startPoint.lat,
-              startPoint.lng,
-              endPoint.lat,
-              endPoint.lng,
-              startPoint.lat + deltaLat * positionIndex
-            ),
+            lng: this.lineFunc(startPoint.lat, startPoint.lng, endPoint.lat, endPoint.lng, startPoint.lat + deltaLat * positionIndex),
           }
           positionIndex++
         } else {
@@ -199,9 +163,7 @@ export default {
       // Удаляем предыдущую линию
       this.lines = this.lines.filter((line) => line.id !== 'lineFor' + forID)
       // Удаляем предыдущий маркер
-      this.destinationMarkers = this.destinationMarkers.filter(
-        (destinationMarker) => destinationMarker.for !== forID
-      )
+      this.destinationMarkers = this.destinationMarkers.filter((destinationMarker) => destinationMarker.for !== forID)
     },
     addWorkerMarker(event) {
       if (this.workerMarkerMode) {
@@ -213,10 +175,7 @@ export default {
           position: event.latlng,
         })
 
-        window.localStorage.setItem(
-          'workers',
-          JSON.stringify(this.workerMarkers)
-        )
+        window.localStorage.setItem('workers', JSON.stringify(this.workerMarkers))
 
         // this.client.send({
         //   id: 'worker' + this.currentWorkerMarkerId,
@@ -239,17 +198,11 @@ export default {
         // Если ввели меньше 4-х точек
         if (this.polygonPointsCounter < 4) {
           // Записываем координаты точек в полигон
-          this.polygonsOut[this.currentPolyId].latlngs.push([
-            event.latlng.lat,
-            event.latlng.lng,
-          ])
+          this.polygonsOut[this.currentPolyId].latlngs.push([event.latlng.lat, event.latlng.lng])
           this.polygonPointsCounter++
           if (this.polygonPointsCounter === 4) {
             // Добавляем новый полигон
-            window.localStorage.setItem(
-              'polygons',
-              JSON.stringify(this.polygonsOut)
-            )
+            window.localStorage.setItem('polygons', JSON.stringify(this.polygonsOut))
             this.currentPolyId++
             this.polygonPointsCounter = 0
           }

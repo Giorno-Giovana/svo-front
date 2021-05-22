@@ -1,14 +1,10 @@
 <template>
   <div id="map-wrap" style="height: 100vh">
     <span class=""></span>
-    <svo-map />
+    <svo-map @onPolyClick="polyClick($event)" />
     <transition name="slide-fade">
       <status-picker v-if="currentStep === 1" @next="log" />
-      <SnowPicker
-        v-if="currentStep === 2"
-        @next="log"
-        @back="currentStep -= 1"
-      />
+      <SnowPicker v-if="currentStep === 2" @next="log" @back="currentStep -= 1" />
       <task-sent v-if="currentStep === 3" />
     </transition>
   </div>
@@ -23,7 +19,8 @@ export default {
   components: { SvoMap, TaskSent, StatusPicker, SnowPicker },
   data() {
     return {
-      currentStep: 1,
+      currentStep: 0,
+      currentPoly: {},
     }
   },
   methods: {
@@ -34,7 +31,10 @@ export default {
           this.currentStep++
         }, 2000)
       }
-      console.log(args)
+    },
+    polyClick(data) {
+      this.currentPoly = data
+      console.log(data)
     },
   },
 }
