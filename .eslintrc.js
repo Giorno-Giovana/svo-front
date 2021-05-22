@@ -12,7 +12,7 @@ module.exports = {
   // add your custom rules here
   rules: {
     'no-console': 0,
-    'max-len': ['error', { code: 140 }],
+    'max-len': ['warn', { code: 140 }],
     'no-undef': 1,
     'vue/no-unused-components': 1,
     'linebreak-style': 0,
