@@ -4,6 +4,7 @@
       <l-tile-layer url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"></l-tile-layer>
       <!--   Маркеры назначения   -->
       <l-marker v-for="marker in destinationMarkers" :key="marker.id" :lat-lng="marker.location" @click="removeMarker(marker.id)" />
+      <l-marker v-if="locationMarker.location" :lat-lng="locationMarker.location" />
       <!--   Маркеры исполнителей   -->
       <l-marker v-for="marker of workerMarkers" :key="marker.id" :lat-lng="marker.location" @click="removeMarker(marker.id)">
         <l-icon :icon-anchor="[16, 37]" class-name="worker-point">
@@ -53,6 +54,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    choiseLocation: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -72,6 +77,7 @@ export default {
       destinationMarkers: [],
       workerMarkers: [],
       polygons,
+      locationMarker: {},
       lines: [],
       animationInterval: null,
       isRunAnimation: false,
@@ -86,7 +92,9 @@ export default {
   },
   mounted() {
     this.client.onMessage((connection, data) => {
-      this.workerMarkers = data.workers
+      if (data?.workers) {
+        this.workerMarkers = data.workers
+      }
     })
   },
   created() {
@@ -107,11 +115,13 @@ export default {
       this.addWorkerMarker(event)
     },
     polyCLick(poly) {
-      this.polygons = this.polygons.map((polygon) => {
-        polygon.stroke = polygon.id === poly.id
-        return polygon
-      })
-      this.$emit('onPolyClick', poly)
+      if (!this.choiseLocation) {
+        this.polygons = this.polygons.map((polygon) => {
+          polygon.stroke = polygon.id === poly.id
+          return polygon
+        })
+        this.$emit('onPolyClick', poly)
+      }
     },
     clearPolygonsSelection() {
       this.polygons = this.polygons.map((polygon) => {
@@ -166,22 +176,28 @@ export default {
     },
     addDestinationMarker(event) {
       // Если не анимация и мод добавления перемещения
-      if (this.destinationMarkerMode && !this.isRunAnimation) {
-        this.currentDestinationMarkerId++
-        const workerID = 'worker' + this.currentWorkerMarkerId
-        // Записываем маркер перемещения
-        this.destinationMarkers.push({
-          id: 'destination' + this.currentDestinationMarkerId,
-          location: event.latlng,
-          for: workerID,
-        })
-        // Рисуем линию от точки назначения к ее исполнителю
-        this.drawLine(
-          this.workerMarkers[this.currentWorkerMarkerId - 1].location,
-          this.destinationMarkers[this.currentDestinationMarkerId - 1].location,
-          workerID
-        )
+      if (this.choiseLocation) {
+        this.$emit('onLocationChoise', event.latlng)
       }
+      this.locationMarker = {
+        location: event.latlng,
+      }
+      // if (this.choiseLocation) {
+      //   this.currentDestinationMarkerId++
+      //   const workerID = 'worker' + this.currentWorkerMarkerId
+      //   // Записываем маркер перемещения
+      //   this.destinationMarkers.push({
+      //     id: 'destination' + this.currentDestinationMarkerId,
+      //     location: event.latlng,
+      //     for: workerID,
+      //   })
+      //   // Рисуем линию от точки назначения к ее исполнителю
+      //   this.drawLine(
+      //     this.workerMarkers[this.currentWorkerMarkerId - 1].location,
+      //     this.destinationMarkers[this.currentDestinationMarkerId - 1].location,
+      //     workerID
+      //   )
+      // }
     },
     clearPreviousPath(forID) {
       // Удаляем предыдущую линию

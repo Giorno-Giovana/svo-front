@@ -41,7 +41,6 @@ export default {
       this.selected = status
     },
     emitNext() {
-      console.log('emit')
       this.$emit('next', { status: this.selected })
     },
   },
