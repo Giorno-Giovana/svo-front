@@ -21,6 +21,7 @@
 </template>
 
 <script>
+import { subscribeToWS } from '../shared/api'
 import CornerMenu from './corner-menu'
 import CornerMenuElement from './corner-menu-element'
 export default {
@@ -36,6 +37,11 @@ export default {
         { text: 'Нужна очистка сектора 16', id: 5 },
       ],
     }
+  },
+  mounted() {
+    subscribeToWS((data) => {
+      console.log('SUBSCRIBE', data)
+    })
   },
 }
 </script>

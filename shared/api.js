@@ -28,3 +28,17 @@ export default class SocketClient {
     this.webSocket.close()
   }
 }
+
+const socket = new WebSocket('ws://localhost:3257')
+const socketHandlers = []
+socket.onmessage = (e) => {
+  const data = JSON.parse(e.data)
+  socketHandlers.forEach((fn) => fn(data))
+}
+export function subscribeToWS(cb) {
+  socketHandlers.push(cb)
+}
+
+export function send(data) {
+  socket.send(JSON.stringify(data))
+}

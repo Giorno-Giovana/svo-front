@@ -122,7 +122,7 @@ export default {
       this.suggestedVehicles.find((el) => el.id === checkedValue.target.value).selected = checkedValue.target.checked
     },
     createTask() {
-      this.addTask({})
+      this.addTask({ vehicles: this.suggestedVehicles.map((elm) => elm.vehicles.filter((vehicle) => vehicle.selected)) })
     },
     suggestVehicles(type) {
       this.currentVehicleType = type
