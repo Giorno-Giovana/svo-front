@@ -5,7 +5,7 @@ export default class SocketClient {
       this.send(JSON.stringify(data))
     }
     this.onMessageHandler = function (connect, data) {
-      console.log(data)
+      // console.log(data)
     }
     const client = this
     this.webSocket.onmessage = function (event) {

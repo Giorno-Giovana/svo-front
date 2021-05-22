@@ -1,6 +1,7 @@
 <template>
   <bottom-menu>
     Выберите важность уборки снега
+    <span class="float-right" @click="closePicker">X</span>
     <div class="flex justify-between mt-10 mb-10">
       <div
         v-for="status in statuses"
@@ -33,11 +34,15 @@ export default {
     }
   },
   methods: {
+    closePicker() {
+      this.$emit('closePicker')
+    },
     chooseStatus(status) {
       this.selected = status
     },
     emitNext() {
-      this.$emit('next', this.selected)
+      console.log('EMIT', this.selected)
+      this.$emit('next', { status: this.selected })
     },
   },
 }

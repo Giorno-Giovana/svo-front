@@ -3,11 +3,12 @@
     <l-map :zoom="15" :center="[55.973383313398216, 37.41584111915638]" @click="mapClick">
       <l-tile-layer url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"></l-tile-layer>
       <!--   Маркеры назначения   -->
-      <l-marker v-for="marker in destinationMarkers" :key="marker.id" :lat-lng="marker.position" @click="removeMarker(marker.id)" />
+      <l-marker v-for="marker in destinationMarkers" :key="marker.id" :lat-lng="marker.location" @click="removeMarker(marker.id)" />
+      <l-marker v-if="locationMarker.location" :lat-lng="locationMarker.location" />
       <!--   Маркеры исполнителей   -->
-      <l-marker v-for="marker in workerMarkers" :key="marker.id" :lat-lng="marker.position" @click="removeMarker(marker.id)">
+      <l-marker v-for="marker of workerMarkers" :key="marker.id" :lat-lng="marker.location" @click="removeMarker(marker.id)">
         <l-icon :icon-anchor="[16, 37]" class-name="worker-point">
-          <div class="headline">{{ marker.name }}</div>
+          <div class="headline">{{ marker.type }}[{{ marker.id }}]</div>
           <img class="img" src="../assets/snowcar.svg" />
         </l-icon>
       </l-marker>
@@ -18,7 +19,8 @@
         :key="polygon.id"
         :lat-lngs="polygon.latlngs"
         :color="polygon.color"
-        @click="polyCLick(polygon)"
+        :stroke="polygon.id === strokedPolygonId"
+        @mouseup="polyCLick($event, polygon)"
       ></l-polygon>
       <!--    Lines     -->
       <l-polyline v-for="line in lines" :key="line.id" :lat-lngs="line.latlngs" :color="'white'"></l-polyline>
@@ -41,20 +43,31 @@
 </template>
 
 <script>
-// import SocketClient from '../shared/api'
-// import config from '../api-conf'
+import SocketClient from '../shared/api'
+import config from '../api-conf'
 import polygons from './polygon-store.json'
 
 export default {
   name: 'SvoMap',
+  props: {
+    clearPoly: {
+      type: Boolean,
+      default: false,
+    },
+    choiseLocation: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
-      // client: new SocketClient(config),
+      client: new SocketClient(config),
       destinationMarkerMode: false,
       polyMode: false,
       workerMarkerMode: false,
       polygonPointsCounter: 0,
       polygonsOut: [],
+      strokedPolygonId: '',
       currentPolyId: 0,
       currentDestinationMarkerId: 0,
       currentWorkerMarkerId: 0,
@@ -65,13 +78,25 @@ export default {
       destinationMarkers: [],
       workerMarkers: [],
       polygons,
+      locationMarker: {},
       lines: [],
       animationInterval: null,
       isRunAnimation: false,
     }
   },
+  watch: {
+    clearPoly(value) {
+      if (value) {
+        this.clearPolygonsSelection()
+      }
+    },
+  },
   mounted() {
-    // this.client.onMessage(console.log)
+    this.client.onMessage((connection, data) => {
+      if (data?.workers) {
+        this.workerMarkers = data.workers
+      }
+    })
   },
   created() {
     while (this.colors.length < 100) {
@@ -81,19 +106,33 @@ export default {
       this.colors.push('#' + ('000000' + this.color.toString(16)).slice(-6))
     }
   },
+  destroyed() {
+    this.client.close()
+  },
   methods: {
     mapClick(event) {
       // Добавить маркер перемещения
-      this.addDestinationMarker(event)
+      // this.addDestinationMarker(event)
       // Добавить полигон TODO: убрать, когда утвердим полигоны
       this.addPolygon(event)
       // Добавить маркер исполнителя
       this.addWorkerMarker(event)
     },
-    polyCLick(poly) {
-      console.log('click polygon')
-      this.$emit('onPolyClick', poly)
-      // alert('polygon click. type: ' + poly.type + ' id: ' + poly.id)
+    polyCLick(event, poly) {
+      if (!this.choiseLocation) {
+        this.strokedPolygonId = this.polygons.find((polygon) => polygon.id === poly.id).id
+        this.$emit('onPolyClick', poly)
+      } else {
+        const flashedPolygon = this.polygons.find((polygon) => polygon.id === this.strokedPolygonId)
+
+        if (flashedPolygon === poly) {
+          this.addDestinationMarker(event.latlng)
+        }
+      }
+    },
+    clearPolygonsSelection() {
+      this.locationMarker = {}
+      this.strokedPolygonId = ''
     },
     drawLine(startPoint, endPoint, id) {
       const lineId = 'lineFor' + id
@@ -120,7 +159,7 @@ export default {
         this.isRunAnimation = true
         if (positionIndex < 40) {
           // Меняем позицию исполнителя
-          currentWorker.position = {
+          currentWorker.location = {
             lat: startPoint.lat + deltaLat * positionIndex,
             lng: this.lineFunc(startPoint.lat, startPoint.lng, endPoint.lat, endPoint.lng, startPoint.lat + deltaLat * positionIndex),
           }
@@ -142,22 +181,29 @@ export default {
     },
     addDestinationMarker(event) {
       // Если не анимация и мод добавления перемещения
-      if (this.destinationMarkerMode && !this.isRunAnimation) {
-        this.currentDestinationMarkerId++
-        const workerID = 'worker' + this.currentWorkerMarkerId
-        // Записываем маркер перемещения
-        this.destinationMarkers.push({
-          id: 'destination' + this.currentDestinationMarkerId,
-          position: event.latlng,
-          for: workerID,
-        })
-        // Рисуем линию от точки назначения к ее исполнителю
-        this.drawLine(
-          this.workerMarkers[this.currentWorkerMarkerId - 1].position,
-          this.destinationMarkers[this.currentDestinationMarkerId - 1].position,
-          workerID
-        )
+
+      if (this.choiseLocation) {
+        this.locationMarker = {
+          location: event,
+        }
+        this.$emit('onLocationChoise', event)
       }
+      // if (this.choiseLocation) {
+      //   this.currentDestinationMarkerId++
+      //   const workerID = 'worker' + this.currentWorkerMarkerId
+      //   // Записываем маркер перемещения
+      //   this.destinationMarkers.push({
+      //     id: 'destination' + this.currentDestinationMarkerId,
+      //     location: event.latlng,
+      //     for: workerID,
+      //   })
+      //   // Рисуем линию от точки назначения к ее исполнителю
+      //   this.drawLine(
+      //     this.workerMarkers[this.currentWorkerMarkerId - 1].location,
+      //     this.destinationMarkers[this.currentDestinationMarkerId - 1].location,
+      //     workerID
+      //   )
+      // }
     },
     clearPreviousPath(forID) {
       // Удаляем предыдущую линию
@@ -169,18 +215,18 @@ export default {
       if (this.workerMarkerMode) {
         this.currentWorkerMarkerId++
         // Добавляем маркер исполнителя
-        this.workerMarkers.push({
-          id: 'worker' + this.currentWorkerMarkerId,
-          type: this.workerType,
-          position: event.latlng,
-        })
-
-        window.localStorage.setItem('workers', JSON.stringify(this.workerMarkers))
-
-        // this.client.send({
-        //   id: 'worker' + this.currentWorkerMarkerId,
-        //   position: event.latlng,
+        // this.workerMarkers.push({
+        //   type: this.workerType,
+        //   location: event.latlng,
         // })
+
+        this.client.send({
+          method: 'makeWorker',
+          makeWorker: {
+            type: this.workerType,
+            location: event.latlng,
+          },
+        })
       }
     },
     addPolygon(event) {
@@ -191,7 +237,7 @@ export default {
           this.polygonsOut.push({
             id: 'polygon' + this.currentPolyId,
             latlngs: [],
-            color: this.colors[this.currentPolyId],
+            color: 'blue',
             type: this.polyType,
           })
         }
@@ -232,7 +278,6 @@ export default {
 }
 .worker-point .headline {
   color: white;
-  font-size: 20px;
   margin-bottom: -10px;
   margin-left: 3px;
 }
