@@ -19,7 +19,7 @@
         :key="polygon.id"
         :lat-lngs="polygon.latlngs"
         :color="polygon.color"
-        :stroke="polygon.stroke || false"
+        :stroke="polygon.id === strokedPolygonId"
         @mouseup="polyCLick($event, polygon)"
       ></l-polygon>
       <!--    Lines     -->
@@ -67,6 +67,7 @@ export default {
       workerMarkerMode: false,
       polygonPointsCounter: 0,
       polygonsOut: [],
+      strokedPolygonId: '',
       currentPolyId: 0,
       currentDestinationMarkerId: 0,
       currentWorkerMarkerId: 0,
@@ -105,6 +106,9 @@ export default {
       this.colors.push('#' + ('000000' + this.color.toString(16)).slice(-6))
     }
   },
+  destroyed() {
+    this.client.close()
+  },
   methods: {
     mapClick(event) {
       // Добавить маркер перемещения
@@ -116,13 +120,10 @@ export default {
     },
     polyCLick(event, poly) {
       if (!this.choiseLocation) {
-        this.polygons = this.polygons.map((polygon) => {
-          polygon.stroke = polygon.id === poly.id
-          return polygon
-        })
+        this.strokedPolygonId = this.polygons.find((polygon) => polygon.id === poly.id).id
         this.$emit('onPolyClick', poly)
       } else {
-        const flashedPolygon = this.polygons.find((polygon) => polygon.stroke)
+        const flashedPolygon = this.polygons.find((polygon) => polygon.id === this.strokedPolygonId)
 
         if (flashedPolygon === poly) {
           this.addDestinationMarker(event.latlng)
@@ -131,10 +132,7 @@ export default {
     },
     clearPolygonsSelection() {
       this.locationMarker = {}
-      this.polygons = this.polygons.map((polygon) => {
-        polygon.stroke = false
-        return polygon
-      })
+      this.strokedPolygonId = ''
     },
     drawLine(startPoint, endPoint, id) {
       const lineId = 'lineFor' + id
@@ -223,16 +221,12 @@ export default {
         // })
 
         this.client.send({
+          method: 'makeWorker',
           makeWorker: {
             type: this.workerType,
             location: event.latlng,
           },
         })
-
-        // this.client.send({
-        //   id: 'worker' + this.currentWorkerMarkerId,
-        //   position: event.latlng,
-        // })
       }
     },
     addPolygon(event) {

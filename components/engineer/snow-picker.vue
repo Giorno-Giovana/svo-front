@@ -12,7 +12,7 @@
     </div>
     <div class="flex">
       <designed-button secondary style="margin-right: 5px" text="Назад" @click="$emit('back')" />
-      <designed-button style="margin-left: 5px" text="Далее" @click="$emit('next', { snowVolume: snowVolumeText })" />
+      <designed-button style="margin-left: 5px" text="Далее" @click="$emit('next', { snowVolume: snowVolume * 10 })" />
     </div>
   </bottom-menu>
 </template>

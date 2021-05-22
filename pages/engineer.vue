@@ -21,11 +21,14 @@ import LocationPicker from '@/components/engineer/location-picker'
 import SnowPicker from '../components/engineer/snow-picker'
 import StatusPicker from '../components/engineer/status-picker'
 import TaskSent from '../components/engineer/task-sent'
+import SocketClient from '../shared/api'
+import config from '../api-conf'
 import SvoMap from '~/components/svo-map'
 export default {
   components: { LocationPicker, SvoMap, TaskSent, StatusPicker, SnowPicker },
   data() {
     return {
+      client: new SocketClient(config),
       currentStep: 0,
       clearPoly: false,
       currentPoly: {},
@@ -37,15 +40,37 @@ export default {
       this.choiseLocation = step === 2
     },
   },
+  destroyed() {
+    this.client.close()
+  },
   methods: {
     nextPicker(args) {
-      if (args.status) {
+      console.log(args)
+      // eslint-disable-next-line no-prototype-builtins
+      if (args.hasOwnProperty('status') && args.status !== undefined) {
         this.currentPoly.status = args.status
       }
 
       if (args.snowVolume) {
         this.currentPoly.snowVolume = args.snowVolume
-        console.log(this.currentPoly)
+        console.log({
+          method: 'claim',
+          claim: {
+            id: this.currentPoly.id,
+            status: this.currentPoly.status,
+            volume: this.currentPoly.status ? this.currentPoly.snowVolume : 0,
+            location: this.currentPoly.location,
+          },
+        })
+        this.client.send({
+          method: 'claim',
+          claim: {
+            id: this.currentPoly.id,
+            status: this.currentPoly.status,
+            volume: this.currentPoly.status ? this.currentPoly.snowVolume : 0,
+            location: this.currentPoly.location,
+          },
+        })
       }
       this.currentStep++
       if (this.currentStep === 4) {
