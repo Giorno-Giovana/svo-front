@@ -7,16 +7,17 @@
     </l-map>
 
     <div class="fixed bottom-0 flex justify-between w-screen" style="z-index: 1000">
-      <div></div>
-      <Tasks />
+      <notifications @notificationChoose="log" />
+      <Tasks @taskChoose="log" />
     </div>
   </div>
 </template>
 
 <script>
 import Tasks from '../components/tasks'
+import Notifications from '../components/notifications'
 export default {
-  components: { Tasks },
+  components: { Notifications, Tasks },
   data() {
     return {}
   },

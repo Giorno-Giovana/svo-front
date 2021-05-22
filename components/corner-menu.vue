@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-96 h-64 p-6 pb-0 overflow-auto"
+    class="w-96 h-64 p-6 pb-0 overflow-auto bottom-0 mt-auto"
     :class="{ 'h-screen': isExpended, right: corner === 'right', left: corner === 'left' }"
     style="backdrop-filter: blur(12px); background: rgba(22, 24, 28, 0.5)"
   >
@@ -40,5 +40,8 @@ export default {
 }
 .left {
   border-radius: 0 24px 0 0;
+}
+::-webkit-scrollbar {
+  display: none;
 }
 </style>

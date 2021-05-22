@@ -1,6 +1,6 @@
 <template>
   <corner-menu title="Текущие задачи" corner="right">
-    <corner-menu-element v-for="task in tasks" :key="task.id">
+    <corner-menu-element v-for="task in tasks" :key="task.id" @click="$emit('taskChoose', task)">
       <div>
         <div>{{ task.text }}</div>
         <div class="flex mt-1">
@@ -13,7 +13,7 @@
         </div>
       </div>
       <div class="text-white-primary">
-        <vue-ellipse-progress size="50" color="#2D9CFC" :progress="50" empty-color="#888B8F">
+        <vue-ellipse-progress :size="50" color="#2D9CFC" :progress="50" empty-color="#888B8F">
           <span slot="legend-value">%</span>
         </vue-ellipse-progress>
       </div>
