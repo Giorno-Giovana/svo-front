@@ -21,7 +21,7 @@
           <div class="text-sm mt-1">Рекомендуется: {{ vehicle.recommendation }}шт</div>
         </div>
       </div>
-      <img class="ml-auto cursor-pointer" src="~assets/right-arrow.svg" alt="" @click="openDrawer" />
+      <img class="ml-auto cursor-pointer" src="~assets/right-arrow.svg" alt="" @click="suggestVehicles(vehicle.type)" />
     </div>
 
     <designed-button text="Создать задачу" @click="createTask" />
@@ -38,11 +38,15 @@
         <img src="~assets/left-arrow.svg" class="cursor-pointer" alt="" @click="closeDrawer" />
         <div class="ml-3 text-2xl">Плужно-щеточная машина с реагентом (25шт)</div>
       </div>
-      <div v-for="suggestedVehicle in suggestedVehicles" :key="suggestedVehicle.id" class="flex mt-6">
+      <div
+        v-for="suggestedVehicle in suggestedVehicles.find((el) => el.type === currentVehicleType).vehicles"
+        :key="suggestedVehicle.id"
+        class="flex mt-6"
+      >
         <div class="mt-3">
           <a-checkbox :value="suggestedVehicle.id" :checked="suggestedVehicle.selected" @change="onChange" />
         </div>
-        <car-icon vehicle="car1" class="ml-4 mr-6" />
+        <car-icon :vehicle="currentVehicleType" class="ml-4 mr-6" />
         <div>
           <div class="flex">
             <div class="text-xl">{{ suggestedVehicle.name }}</div>
@@ -72,6 +76,10 @@ export default {
     return {
       title: 'Сектор С15',
       subTitle: 'Требуется очистка',
+      tasK: {
+        vehicles: [],
+      },
+      currentVehicleType: null,
       vehicles: [
         { id: 1, type: 'car1', recommendation: 3, count: 0 },
         { id: 2, type: 'car2', recommendation: 3, count: 0 },
@@ -80,13 +88,30 @@ export default {
         { id: 5, type: 'car5', recommendation: 3, count: 0 },
       ],
       suggestedVehicles: [
-        { id: 1, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car1', selected: true },
-        { id: 2, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car1', selected: true },
-        { id: 3, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car1', selected: true },
-        { id: 4, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car1', selected: false },
-        { id: 5, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car1', selected: false },
-        { id: 6, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car1', selected: false },
-        { id: 7, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car1', selected: false },
+        {
+          type: 'car1',
+          vehicles: [
+            { id: 1, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car1', selected: true },
+            { id: 2, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car1', selected: true },
+            { id: 3, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car1', selected: true },
+            { id: 4, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car1', selected: false },
+            { id: 5, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car1', selected: false },
+            { id: 6, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car1', selected: false },
+            { id: 7, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car1', selected: false },
+          ],
+        },
+        {
+          type: 'car2',
+          vehicles: [
+            { id: 1, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car2', selected: false },
+            { id: 2, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car2', selected: false },
+            { id: 3, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car2', selected: false },
+            { id: 4, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car2', selected: false },
+            { id: 5, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car2', selected: true },
+            { id: 6, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car2', selected: true },
+            { id: 7, status: 'free', name: 'Машина #24', fuelReserve: '2 часа', pathTime: '5 мин', type: 'car2', selected: true },
+          ],
+        },
       ],
     }
   },
@@ -95,7 +120,13 @@ export default {
       console.log(checkedValue)
       this.suggestedVehicles.find((el) => el.id === checkedValue.target.value).selected = checkedValue.target.checked
     },
-    createTask() {},
+    createTask() {
+      this.addTask({})
+    },
+    suggestVehicles(type) {
+      this.currentVehicleType = type
+      this.openDrawer()
+    },
   },
 }
 </script>

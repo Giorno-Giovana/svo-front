@@ -95,6 +95,7 @@ export default {
     this.client.onMessage((connection, data) => {
       if (data?.workers) {
         this.workerMarkers = data.workers
+        window.svo = data
       }
     })
   },
