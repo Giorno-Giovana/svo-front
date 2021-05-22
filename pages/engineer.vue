@@ -1,14 +1,14 @@
 <template>
   <div id="map-wrap" style="height: 100vh">
     <span class=""></span>
-    <l-map :zoom="15" :center="[55.981317, 37.410052]" @click="log">
-      <l-tile-layer url="https://{s}.tile.osm.org/{z}/{x}/{y}.png" />
-      <l-marker :lat-lng="[55.9464418, 8.1277591]"></l-marker>
-    </l-map>
-
+    <svo-map />
     <transition name="slide-fade">
       <status-picker v-if="currentStep === 1" @next="log" />
-      <SnowPicker v-if="currentStep === 2" @next="log" />
+      <SnowPicker
+        v-if="currentStep === 2"
+        @next="log"
+        @back="currentStep -= 1"
+      />
       <task-sent v-if="currentStep === 3" />
     </transition>
   </div>
@@ -18,8 +18,9 @@
 import SnowPicker from '../components/engineer/snow-picker'
 import StatusPicker from '../components/engineer/status-picker'
 import TaskSent from '../components/engineer/task-sent'
+import SvoMap from '~/components/svo-map'
 export default {
-  components: { TaskSent, StatusPicker, SnowPicker },
+  components: { SvoMap, TaskSent, StatusPicker, SnowPicker },
   data() {
     return {
       currentStep: 1,

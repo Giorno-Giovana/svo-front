@@ -8,7 +8,7 @@
       <a-slider v-model="snowVolume" :min="0" :max="10" />
     </div>
     <div class="flex">
-      <designed-button secondary style="margin-right: 5px" text="Назад" @click="$emit('back', true)" />
+      <designed-button secondary style="margin-right: 5px" text="Назад" @click="$emit('back')" />
       <designed-button style="margin-left: 5px" text="Далее" @click="$emit('next', snowVolume)" />
     </div>
   </bottom-menu>
@@ -28,7 +28,7 @@ export default {
   computed: {
     // TODO доделать эту секцию
     snowVolumeText() {
-      return '10-15 см'
+      return `${this.snowVolume * 10}-${(this.snowVolume + 1) * 10}`
     },
   },
   methods: {
