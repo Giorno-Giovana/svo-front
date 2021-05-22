@@ -70,15 +70,15 @@
 </template>
 
 <script>
-import SocketClient from '../shared/api'
-import config from '../api-conf'
+// import SocketClient from '../shared/api'
+// import config from '../api-conf'
 import polygons from './polygon-store.json'
 
 export default {
   name: 'SvoMap',
   data() {
     return {
-      client: new SocketClient(config),
+      // client: new SocketClient(config),
       destinationMarkerMode: false,
       polyMode: false,
       executorMarkerMode: false,
@@ -99,7 +99,7 @@ export default {
     }
   },
   mounted() {
-    this.client.onMessage(console.log)
+    // this.client.onMessage(console.log)
   },
   created() {
     while (this.colors.length < 100) {
