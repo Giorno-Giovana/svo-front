@@ -177,10 +177,10 @@ export default {
     addDestinationMarker(event) {
       // Если не анимация и мод добавления перемещения
       if (this.choiseLocation) {
+        this.locationMarker = {
+          location: event.latlng,
+        }
         this.$emit('onLocationChoise', event.latlng)
-      }
-      this.locationMarker = {
-        location: event.latlng,
       }
       // if (this.choiseLocation) {
       //   this.currentDestinationMarkerId++
