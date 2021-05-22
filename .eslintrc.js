@@ -15,5 +15,6 @@ module.exports = {
     'max-len': ['error', { code: 140 }],
     'no-undef': 1,
     'vue/no-unused-components': 1,
+    'linebreak-style': 0,
   },
 }
