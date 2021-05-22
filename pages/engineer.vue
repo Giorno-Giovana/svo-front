@@ -1,10 +1,10 @@
 <template>
   <div id="map-wrap" style="height: 100vh">
     <span class=""></span>
-    <svo-map @onPolyClick="polyClick($event)" />
+    <svo-map :clear-poly="clearPoly" @onPolyClick="polyClick($event)" />
     <transition name="slide-fade">
-      <status-picker v-if="currentStep === 1" @next="log" />
-      <SnowPicker v-if="currentStep === 2" @next="log" @back="currentStep -= 1" />
+      <status-picker v-if="currentStep === 1" @closePicker="clearPolySelection" @next="nextPicker($event)" />
+      <SnowPicker v-if="currentStep === 2" @closePicker="clearPolySelection" @next="nextPicker($event)" @back="currentStep -= 1" />
       <task-sent v-if="currentStep === 3" />
     </transition>
   </div>
@@ -20,11 +20,21 @@ export default {
   data() {
     return {
       currentStep: 0,
+      clearPoly: false,
       currentPoly: {},
     }
   },
   methods: {
-    log(args) {
+    nextPicker(args) {
+      console.log('next', args)
+      if (args.status) {
+        this.currentPoly.status = args.status
+      }
+
+      if (args.snowVolume) {
+        this.currentPoly.snowVolume = args.snowVolume
+        // console.log(this.currentPoly)
+      }
       this.currentStep++
       if (this.currentStep === 3) {
         setTimeout(() => {
@@ -33,8 +43,19 @@ export default {
       }
     },
     polyClick(data) {
+      this.clearPoly = false
       this.currentPoly = data
-      console.log(data)
+      this.currentStep = 1
+    },
+    clearPolySelection() {
+      this.currentStep = 0
+      this.clearPoly = true
+    },
+    changeStatus(status) {
+      this.currentPoly.status = status
+    },
+    changeSnowVolume(snowVolume) {
+      this.currentPoly.snowVolume = snowVolume
     },
   },
 }
