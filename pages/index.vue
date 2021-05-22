@@ -5,23 +5,27 @@
       <l-tile-layer url="https://{s}.tile.osm.org/{z}/{x}/{y}.png" />
       <l-marker :lat-lng="[55.9464418, 8.1277591]"></l-marker>
     </l-map>
+
+    <div class="fixed bottom-0 flex justify-between w-screen" style="z-index: 1000">
+      <div></div>
+      <notifications />
+    </div>
   </div>
 </template>
 
 <script>
+import Notifications from '../components/notifications'
 export default {
+  components: { Notifications },
   data() {
-    return {
-      points: [],
-    }
+    return {}
   },
   methods: {
     log(args) {
-      this.points.push(args)
-      console.log(this.points)
+      console.log(args)
     },
   },
 }
 </script>
 
-<style></style>
+<style scoped></style>
